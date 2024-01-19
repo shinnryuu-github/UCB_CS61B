@@ -41,7 +41,7 @@ public class worldgenerator {
 
     }
 
-    public static TETile[][] generate(int seed){
+    public static TETile[][] generate(long seed){
         Random rand = new Random(seed);
 
         TETile[][] world = new TETile[Width][Height];

@@ -33,7 +33,7 @@ public class Game {
         // drawn if the same inputs had been given to playWithKeyboard().
         char a1 = input.charAt(0);
         String numbers = input.substring(1, input.length() - 2);
-        int seed = Integer.parseInt(numbers);
+        long seed = Long.parseLong(numbers);
         if (a1 == 'n' || a1 == 'N'){
             return worldgenerator.generate(seed);
         }
