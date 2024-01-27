@@ -1,5 +1,7 @@
 package hw2;
 
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 import java.util.HashMap;
@@ -38,7 +40,7 @@ public class Percolation {
         if (row == 0){
             sets.union(sites[row][col].num, size * size);
         }
-        if (row == size - 1 && isFull(row, col)){
+        if (row == size - 1){
             sets.union(sites[row][col].num, size * size + 1);
         }
         if (row != 0){
@@ -63,10 +65,8 @@ public class Percolation {
         }
     }
     public void open(int row, int col){
-        if (row >= size || col >= size)
+        if (row >= size || col >= size || row < 0 || col < 0)
             throw new IndexOutOfBoundsException();
-        else if (row < 0 || col < 0)
-            throw new IllegalArgumentException();
         else{
             sites[row][col].is_open = true;
             OpenNum++;
@@ -74,19 +74,15 @@ public class Percolation {
         }
     }
     public boolean isOpen(int row, int col) {
-        if (row >= size || col >= size)
+        if (row >= size || col >= size || row < 0 || col < 0)
             throw new IndexOutOfBoundsException();
-        else if (row < 0 || col < 0)
-            throw new IllegalArgumentException();
         else{
             return sites[row][col].is_open;
         }
     }
     public boolean isFull(int row, int col){
-        if (row >= size || col >= size)
+        if (row >= size || col >= size || row < 0 || col < 0)
             throw new IndexOutOfBoundsException();
-        else if (row < 0 || col < 0)
-            throw new IllegalArgumentException();
         else{
             return sets.connected(sites[row][col].num, size * size);
         }
@@ -99,6 +95,14 @@ public class Percolation {
     }
 
     public static void main(String[] args){
-
+        In in = new In(args[0]);
+        int N = in.readInt();
+        Percolation perc = new Percolation(N);
+        while (!in.isEmpty()) {
+            int i = in.readInt();
+            int j = in.readInt();
+            perc.open(i, j);
+        }
+        System.out.println(perc.percolates());
     }
 }
