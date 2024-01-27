@@ -92,9 +92,11 @@ public class Percolation {
         if (row >= size || col >= size || row < 0 || col < 0)
             throw new IndexOutOfBoundsException();
         else{
-            sites[row][col].is_open = true;
-            OpenNum++;
-            connect(row, col);
+            if (!sites[row][col].is_open){
+                sites[row][col].is_open = true;
+                OpenNum++;
+                connect(row, col);
+            }
         }
     }
     public boolean isOpen(int row, int col) {
