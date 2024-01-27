@@ -2,18 +2,20 @@ package hw2;
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
+import java.util.HashMap;
+
 public class Percolation {
 
-    private int size;
+    private int size, OpenNum;
     private WeightedQuickUnionUF sets;
     private site[][] sites;
+
     private class site{
-        private int state, num, row, col;
-        public site(int i, int j, int size, int s){
-            state = s;
+        private int num;
+        private boolean is_open;
+        public site(int i, int j, int size, boolean open){
+            is_open = open;
             num = i * size + j;
-            row = i;
-            col = j;
         }
     }
     public Percolation(int N){
@@ -23,47 +25,40 @@ public class Percolation {
             sites = new site[N][N];
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
-                    sites[i][j] = new site(i, j, N, 0);
+                    sites[i][j] = new site(i, j, N, false);
                 }
             }
             size = N;
-            sets = new WeightedQuickUnionUF(N * N);
+            OpenNum = 0;
+            sets = new WeightedQuickUnionUF(N * N + 2);
         }
     }
 
     private void connect(int row, int col){
-        if (sites[row][col].state == 2 || sites[row][col].state == 1){
-            if (row != 0){
-                if (sites[row - 1][col].state == 2 || sites[row - 1][col].state == 1){
-                    sets.union(sites[row][col].num, sites[row - 1][col].num);
-                }
-            }
-            if (row != size - 1){
-                if (sites[row + 1][col].state == 2 || sites[row + 1][col].state == 1){
-                    sets.union(sites[row][col].num, sites[row + 1][col].num);
-                }
-            }
-            if (col != 0){
-                if (sites[row][col - 1].state == 2 || sites[row][col - 1].state == 1){
-                    sets.union(sites[row][col].num, sites[row][col - 1].num);
-                }
-            }
-            if (col != size - 1){
-                if (sites[row][col + 1].state == 2 || sites[row][col + 1].state == 1){
-                    sets.union(sites[row][col].num, sites[row][col + 1].num);
-                }
+        if (row == 0){
+            sets.union(sites[row][col].num, size * size);
+        }
+        if (row == size - 1 && isFull(row, col)){
+            sets.union(sites[row][col].num, size * size + 1);
+        }
+        if (row != 0){
+            if (sites[row - 1][col].is_open){
+                sets.union(sites[row][col].num, sites[row - 1][col].num);
             }
         }
-        for (int i = 0; i < size; i++){
-            for (int j = 0; j < size; j++){
-                if (sites[i][j].state == 1){
-                    for (int k = 0; k < size; k++){
-                        if (sites[0][k].state == 2 && sets.connected(k, sites[i][j].num)) {
-                            sites[i][j].state = 2;
-                            break;
-                        }
-                    }
-                }
+        if (row != size - 1){
+            if (sites[row + 1][col].is_open){
+                sets.union(sites[row][col].num, sites[row + 1][col].num);
+            }
+        }
+        if (col != 0){
+            if (sites[row][col - 1].is_open){
+                sets.union(sites[row][col].num, sites[row][col - 1].num);
+            }
+        }
+        if (col != size - 1){
+            if (sites[row][col + 1].is_open){
+                sets.union(sites[row][col].num, sites[row][col + 1].num);
             }
         }
     }
@@ -73,16 +68,9 @@ public class Percolation {
         else if (row < 0 || col < 0)
             throw new IllegalArgumentException();
         else{
-            sites[row][col].state = 1;
-            if (row == 0)
-                sites[row][col].state = 2;
+            sites[row][col].is_open = true;
+            OpenNum++;
             connect(row, col);
-            for (int i = 0; i < size; i++){
-                if (sites[0][i].state == 2 && sets.connected(i, sites[row][col].num)) {
-                    sites[row][col].state = 2;
-                    break;
-                }
-            }
         }
     }
     public boolean isOpen(int row, int col) {
@@ -91,7 +79,7 @@ public class Percolation {
         else if (row < 0 || col < 0)
             throw new IllegalArgumentException();
         else{
-            return sites[row][col].state == 2 || sites[row][col].state == 1;
+            return sites[row][col].is_open;
         }
     }
     public boolean isFull(int row, int col){
@@ -100,24 +88,17 @@ public class Percolation {
         else if (row < 0 || col < 0)
             throw new IllegalArgumentException();
         else{
-            return sites[row][col].state == 2;
+            return sets.connected(sites[row][col].num, size * size);
         }
     }
     public int numberOfOpenSites(){
-        int cnt = 0;
-        for (int i = 0; i < size; i++){
-            for (int j = 0; j < size; j++){
-                if (sites[i][j].state == 2)
-                    cnt++;
-            }
-        }
-        return cnt;
+        return OpenNum;
     }
     public boolean percolates(){
-        for (int i = 0; i < size; i++){
-            if (sites[size - 1][i].state == 2)
-                return true;
-        }
-        return false;
+        return sets.connected(size * size + 1, size * size);
+    }
+
+    public static void main(String[] args){
+
     }
 }

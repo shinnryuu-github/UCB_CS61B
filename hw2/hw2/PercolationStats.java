@@ -16,13 +16,17 @@ public class PercolationStats {
         return cnt;
     }
     public PercolationStats(int N, int T, PercolationFactory pf){
-        size = N;
-        Times = T;
-        results = new double[T];
-        for (int i = 0; i < T; i++){
-            Percolation p = pf.make(N);
-            int cnt = Experiment(p, size);
-            results[i] = cnt / (double)(N * N);
+        if (N <= 0 || T <= 0)
+            throw new IllegalArgumentException();
+        else {
+            size = N;
+            Times = T;
+            results = new double[T];
+            for (int i = 0; i < T; i++){
+                Percolation p = pf.make(N);
+                int cnt = Experiment(p, size);
+                results[i] = cnt / (double)(N * N);
+            }
         }
     }
     public double mean(){
