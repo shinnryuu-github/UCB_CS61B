@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class Percolation {
 
     private int size, OpenNum;
-    private WeightedQuickUnionUF sets;
+    private WeightedQuickUnionUF sets, backwash;
     private site[][] sites;
 
     private class site{
@@ -33,10 +33,34 @@ public class Percolation {
             size = N;
             OpenNum = 0;
             sets = new WeightedQuickUnionUF(N * N + 2);
+            backwash = new WeightedQuickUnionUF(N * N + 1);
         }
     }
 
     private void connect(int row, int col){
+        if (row == 0){
+            backwash.union(sites[row][col].num, size * size);
+        }
+        if (row != 0){
+            if (sites[row - 1][col].is_open){
+                backwash.union(sites[row][col].num, sites[row - 1][col].num);
+            }
+        }
+        if (row != size - 1){
+            if (sites[row + 1][col].is_open){
+                backwash.union(sites[row][col].num, sites[row + 1][col].num);
+            }
+        }
+        if (col != 0){
+            if (sites[row][col - 1].is_open){
+                backwash.union(sites[row][col].num, sites[row][col - 1].num);
+            }
+        }
+        if (col != size - 1){
+            if (sites[row][col + 1].is_open){
+                backwash.union(sites[row][col].num, sites[row][col + 1].num);
+            }
+        }
         if (row == 0){
             sets.union(sites[row][col].num, size * size);
         }
@@ -84,7 +108,7 @@ public class Percolation {
         if (row >= size || col >= size || row < 0 || col < 0)
             throw new IndexOutOfBoundsException();
         else{
-            return sets.connected(sites[row][col].num, size * size);
+            return sets.connected(sites[row][col].num, size * size) && backwash.connected(sites[row][col].num, size * size);
         }
     }
     public int numberOfOpenSites(){
