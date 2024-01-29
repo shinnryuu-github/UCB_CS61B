@@ -135,17 +135,14 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         else if (cmp > 0)
             p.right = remove_helper(p.right, key);
         else{
-            if (p.left != null) {
-                Node r = p.right;
-                Node lr = p.left;
-                while (lr.right != null) {
-                    lr = lr.right;
-                }
-                lr.right = r;
+            if (p.right == null)
                 return p.left;
-            }
-            else
+            else if (p.left == null)
                 return p.right;
+            Node tmp = findmin(p);
+            p.right = remove_helper(p.right, tmp.key);
+            p.key = tmp.key;
+            p.value = tmp.value;
         }
         return p;
     }
