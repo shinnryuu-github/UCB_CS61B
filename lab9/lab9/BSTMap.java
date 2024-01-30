@@ -118,13 +118,9 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return set;
     }
     private Node findmin(Node p){
-        if (p == null)
-            return null;
-        Node res = p;
-        while (res.left != null){
-            res = res.left;
-        }
-        return res;
+        if (p.left == null)
+            return p;
+        return findmin(p.left);
     }
     private Node remove_helper(Node p, K key){
         if (p == null)
@@ -139,7 +135,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
                 return p.left;
             else if (p.left == null)
                 return p.right;
-            Node tmp = findmin(p);
+            Node tmp = findmin(p.right);
             p.right = remove_helper(p.right, tmp.key);
             p.key = tmp.key;
             p.value = tmp.value;
