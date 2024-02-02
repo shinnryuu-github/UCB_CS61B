@@ -3,8 +3,8 @@ import edu.princeton.cs.algs4.Queue;
 
 public class Board implements WorldState{
 
-    int size;
-    int[][] tile;
+    private int size;
+    private int[][] tile;
     public Board(int[][] tiles){
         size = tiles[0].length;
         tile = new int[size][size];
@@ -111,6 +111,8 @@ public class Board implements WorldState{
         return cnt;
     }
     public boolean equals(Object y){
+        if (y == null)
+            return false;
         if (y == this)
             return true;
         if (y.getClass() != getClass())
