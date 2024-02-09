@@ -44,16 +44,49 @@ public class QuickSort {
      * @param greater   An empty Queue. When the function completes, this queue will contain
      *                  all of the items in unsorted that are greater than the given pivot.
      */
-    private static <Item extends Comparable> void partition(
-            Queue<Item> unsorted, Item pivot,
-            Queue<Item> less, Queue<Item> equal, Queue<Item> greater) {
+    private static <Item extends Comparable> void partition(Queue<Item> unsorted, Item pivot, Queue<Item> less, Queue<Item> equal, Queue<Item> greater) {
         // Your code here!
+        for (Item item : unsorted){
+            int cmp = pivot.compareTo(item);
+            if (cmp < 0)
+                greater.enqueue(item);
+            else if (cmp > 0)
+                less.enqueue(item);
+            else
+                equal.enqueue(item);
+        }
+
     }
 
     /** Returns a Queue that contains the given items sorted from least to greatest. */
-    public static <Item extends Comparable> Queue<Item> quickSort(
-            Queue<Item> items) {
+    public static <Item extends Comparable> Queue<Item> quickSort(Queue<Item> items) {
         // Your code here!
-        return items;
+        if (items.isEmpty())
+            return items;
+        if (items.size() == 1)
+            return items;
+        Queue<Item> res = new Queue<>();
+        Queue<Item> less = new Queue<>(), equal = new Queue<>(), greater = new Queue<>();
+        Item pivot = getRandomItem(items);
+        partition(items, pivot, less, equal, greater);
+        less = quickSort(less);
+        greater = quickSort(greater);
+        res = catenate(catenate(less, equal), greater);
+        return res;
+    }
+
+    public static void main(String[] args){
+        Queue<Integer> students = new Queue<>();
+        students.enqueue(1);
+        students.enqueue(5);
+        students.enqueue(3);
+        students.enqueue(2);
+        for (int i : students)
+            System.out.print(i + " ");
+        students = quickSort(students);
+        System.out.println("");
+        System.out.println("----------");
+        for (int i : students)
+            System.out.print(i + " ");
     }
 }
