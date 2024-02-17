@@ -1,3 +1,7 @@
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 /**
  * Class for doing Radix sort
  *
@@ -17,7 +21,32 @@ public class RadixSort {
      */
     public static String[] sort(String[] asciis) {
         // TODO: Implement LSD Sort
-        return null;
+        int maxradix = 0;
+        for (String s : asciis){
+            if (s.length() > maxradix)
+                maxradix = s.length();
+        }
+        String[] buffer = new String[asciis.length];
+        System.arraycopy(asciis,0,buffer,0,asciis.length);
+        Deque<String>[] sorted = new Deque[257];
+        for (int i = 0; i < 257; i++)
+            sorted[i] = new ArrayDeque<>();
+        for (int i = 1; i <= maxradix; i++){
+            for (String s : buffer){
+                int index = maxradix - i;
+                if (index >= s.length())
+                    sorted[0].addLast(s);
+                else{
+                    sorted[(int)s.charAt(index)].addLast(s);
+                }
+            }
+            int pos = 0;
+            for (int j = 0; j < 257; j++){
+                while (!sorted[j].isEmpty())
+                    buffer[pos++] = sorted[j].removeFirst();
+            }
+        }
+        return buffer;
     }
 
     /**
@@ -44,5 +73,12 @@ public class RadixSort {
     private static void sortHelperMSD(String[] asciis, int start, int end, int index) {
         // Optional MSD helper method for optional MSD radix sort
         return;
+    }
+
+    public static void main(String[] args){
+        String[] unsort = {"23", "2", "100", "1234", "3"};
+        String[] sorted = sort(unsort);
+        for (String s : sorted)
+            System.out.print(s + " ");
     }
 }
