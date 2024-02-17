@@ -20,9 +20,9 @@ import java.util.*;
 public class GraphDB {
     Map<Long, Vertex> graph = new LinkedHashMap<>();
 
-    static class Vertex implements Comparable<Vertex>{
-        long id, prev;
-        double lon, lat, dist, hn;
+    static class Vertex{
+        long id;
+        double lon, lat;
         Set<Long> adjacent;
         Map<String, String> extraInfo;
         Vertex(long id, double lon, double lat){
@@ -31,14 +31,6 @@ public class GraphDB {
             this.lat = lat;
             this.adjacent = new HashSet<>();
             this.extraInfo = new HashMap<>();
-            this.dist = Double.POSITIVE_INFINITY;
-            this.hn = Double.POSITIVE_INFINITY;
-            this.prev = -1;
-        }
-
-        @Override
-        public int compareTo(Vertex v){
-            return (int)Math.round(hn + dist - v.hn - v.dist);
         }
     }
     /** Your instance variables for storing the graph. You should consider
@@ -63,14 +55,6 @@ public class GraphDB {
             e.printStackTrace();
         }
         clean();
-    }
-
-    void renew(){
-        for (Vertex v : graph.values()){
-            v.dist = Double.POSITIVE_INFINITY;
-            v.hn = Double.POSITIVE_INFINITY;
-            v.prev = -1;
-        }
     }
 
     void addVertex(Vertex v){
