@@ -90,10 +90,6 @@ public class MergeSort {
 
     public static void main(String[] args){
         Queue<Integer> students = new Queue<>();
-        students.enqueue(1);
-        students.enqueue(5);
-        students.enqueue(3);
-        students.enqueue(2);
         for (int i : students)
             System.out.print(i + " ");
         students = mergeSort(students);

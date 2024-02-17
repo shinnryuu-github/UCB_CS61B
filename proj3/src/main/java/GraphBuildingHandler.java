@@ -2,9 +2,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.nio.Buffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  *  Parses OSM XML files using an XML SAX parser. Used to construct the graph of roads for
@@ -39,12 +41,21 @@ public class GraphBuildingHandler extends DefaultHandler {
     private String activeState = "";
     private final GraphDB g;
 
+    private GraphDB.Vertex LastVertex;
+
+    private int flag;
+
+    private Stack<Long> buffer;
+
     /**
      * Create a new GraphBuildingHandler.
      * @param g The graph to populate with the XML data.
      */
     public GraphBuildingHandler(GraphDB g) {
         this.g = g;
+        this.LastVertex = null;
+        this.flag = 0;
+        this.buffer = new Stack<>();
     }
 
     /**
@@ -74,11 +85,15 @@ public class GraphBuildingHandler extends DefaultHandler {
 
             /* TODO Use the above information to save a "node" to somewhere. */
             /* Hint: A graph-like structure would be nice. */
-
+            GraphDB.Vertex v = new GraphDB.Vertex(Long.parseLong(attributes.getValue("id")),
+                    Double.parseDouble(attributes.getValue("lon")), Double.parseDouble(attributes.getValue("lat")));
+            g.addVertex(v);
+            LastVertex = v;
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */
             activeState = "way";
 //            System.out.println("Beginning a way...");
+            LastVertex = null;
         } else if (activeState.equals("way") && qName.equals("nd")) {
             /* While looking at a way, we found a <nd...> tag. */
             //System.out.println("Id of a node in this way: " + attributes.getValue("ref"));
@@ -89,7 +104,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             cumbersome since you might have to remove the connections if you later see a tag that
             makes this way invalid. Instead, think of keeping a list of possible connections and
             remember whether this way is valid or not. */
-
+            buffer.add(Long.parseLong(attributes.getValue("ref")));
         } else if (activeState.equals("way") && qName.equals("tag")) {
             /* While looking at a way, we found a <tag...> tag. */
             String k = attributes.getValue("k");
@@ -101,6 +116,8 @@ public class GraphBuildingHandler extends DefaultHandler {
                 //System.out.println("Highway type: " + v);
                 /* TODO Figure out whether this way and its connections are valid. */
                 /* Hint: Setting a "flag" is good enough! */
+                if (ALLOWED_HIGHWAY_TYPES.contains(v))
+                    flag = 1;
             } else if (k.equals("name")) {
                 //System.out.println("Way Name: " + v);
             }
@@ -113,6 +130,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             node this tag belongs to. Remember XML is parsed top-to-bottom, so probably it's the
             last node that you looked at (check the first if-case). */
 //            System.out.println("Node's name: " + attributes.getValue("v"));
+            LastVertex.extraInfo.put("name", attributes.getValue("v"));
         }
     }
 
@@ -134,6 +152,19 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* Hint1: If you have stored the possible connections for this way, here's your
             chance to actually connect the nodes together if the way is valid. */
 //            System.out.println("Finishing a way...");
+            if (flag == 1){
+                long prev = -1;
+                while (!buffer.isEmpty()){
+                    long id = buffer.pop();
+                    if (prev != -1 && prev != id){
+                        g.graph.get(prev).adjacent.add(id);
+                        g.graph.get(id).adjacent.add(prev);
+                    }
+                    prev = id;
+                }
+            }
+            flag = 0;
+            buffer = new Stack<>();
         }
     }
 

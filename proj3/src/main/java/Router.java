@@ -1,5 +1,4 @@
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +11,7 @@ import java.util.regex.Pattern;
  * down to the priority you use to order your vertices.
  */
 public class Router {
+
     /**
      * Return a List of longs representing the shortest path from the node
      * closest to a start location and the node closest to the destination
@@ -25,7 +25,37 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        return null; // FIXME
+        long start = g.closest(stlon, stlat), end =  g.closest(destlon, destlat);
+        List<Long> path = new ArrayList<>();
+        PriorityQueue<GraphDB.Vertex> pq = new PriorityQueue<>();
+        Set<Long> visited = new HashSet<>();
+        pq.add(g.graph.get(start));
+        g.graph.get(start).dist = 0;
+        while (!pq.isEmpty()){
+            GraphDB.Vertex newvertex = pq.remove();
+            visited.add(newvertex.id);
+            if (newvertex.id == end){
+                long tmp = newvertex.id;
+                while (tmp != -1){
+                    path.add(tmp);
+                    tmp = g.graph.get(tmp).prev;
+                }
+                Collections.reverse(path);
+                break;
+            }
+            for (Long v : newvertex.adjacent){
+                if (!visited.contains(v) && newvertex.prev == -1 || newvertex.prev != v){
+                    if (newvertex.dist + g.distance(newvertex.id, v) < g.graph.get(v).dist){
+                        g.graph.get(v).dist = newvertex.dist + g.distance(newvertex.id, v);
+                        g.graph.get(v).hn = g.distance(v, end);
+                        pq.add(g.graph.get(v));
+                        g.graph.get(v).prev = newvertex.id;
+                    }
+                }
+            }
+        }
+        g.renew();
+        return path; // FIXME
     }
 
     /**

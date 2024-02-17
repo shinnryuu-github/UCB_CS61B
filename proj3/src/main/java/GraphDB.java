@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -18,6 +18,29 @@ import java.util.ArrayList;
  * @author Alan Yao, Josh Hug
  */
 public class GraphDB {
+    Map<Long, Vertex> graph = new LinkedHashMap<>();
+
+    static class Vertex implements Comparable<Vertex>{
+        long id, prev;
+        double lon, lat, dist, hn;
+        Set<Long> adjacent;
+        Map<String, String> extraInfo;
+        Vertex(long id, double lon, double lat){
+            this.id = id;
+            this.lon = lon;
+            this.lat = lat;
+            this.adjacent = new HashSet<>();
+            this.extraInfo = new HashMap<>();
+            this.dist = Double.POSITIVE_INFINITY;
+            this.hn = Double.POSITIVE_INFINITY;
+            this.prev = -1;
+        }
+
+        @Override
+        public int compareTo(Vertex v){
+            return (int)Math.round(hn + dist - v.hn - v.dist);
+        }
+    }
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
 
@@ -42,6 +65,18 @@ public class GraphDB {
         clean();
     }
 
+    void renew(){
+        for (Vertex v : graph.values()){
+            v.dist = Double.POSITIVE_INFINITY;
+            v.hn = Double.POSITIVE_INFINITY;
+            v.prev = -1;
+        }
+    }
+
+    void addVertex(Vertex v){
+        graph.put(v.id, v);
+    }
+
     /**
      * Helper to process strings into their "cleaned" form, ignoring punctuation and capitalization.
      * @param s Input string.
@@ -58,6 +93,13 @@ public class GraphDB {
      */
     private void clean() {
         // TODO: Your code here.
+        List<Long> toClean = new ArrayList<>();
+        for (Vertex v : graph.values()){
+            if (v.adjacent.isEmpty())
+                toClean.add(v.id);
+        }
+        for (long v : toClean)
+            graph.remove(v);
     }
 
     /**
@@ -66,7 +108,7 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-        return new ArrayList<Long>();
+        return graph.keySet();
     }
 
     /**
@@ -75,7 +117,7 @@ public class GraphDB {
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        return null;
+        return graph.get(v).adjacent;
     }
 
     /**
@@ -136,7 +178,16 @@ public class GraphDB {
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        return 0;
+        long res = 0;
+        double shortest = Double.POSITIVE_INFINITY;
+        for (Vertex v : graph.values()){
+            double dist = distance(v.lon, v.lat, lon, lat);
+            if (dist < shortest){
+                shortest = dist;
+                res = v.id;
+            }
+        }
+        return res;
     }
 
     /**
@@ -145,7 +196,7 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return 0;
+        return graph.get(v).lon;
     }
 
     /**
@@ -154,6 +205,6 @@ public class GraphDB {
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return 0;
+        return graph.get(v).lat;
     }
 }
