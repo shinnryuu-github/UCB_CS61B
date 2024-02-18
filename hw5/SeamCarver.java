@@ -4,6 +4,10 @@ public class SeamCarver {
     private Picture picture;
     private double[][] energy, buffer;
     private int width, height;
+
+    private static double abs(double d){
+        return (d >= 0)? d : -d;
+    }
     public SeamCarver(Picture picture){
         this.picture = picture;
         this.width = picture.width();
@@ -12,38 +16,38 @@ public class SeamCarver {
         this.buffer = new double[width][height];
         for (int x = 0; x < width; x++){
             for (int y = 0; y < height; y++){
-                int Rx, Gx, Bx, Ry, Gy, By;
+                double Rx, Gx, Bx, Ry, Gy, By;
                 if (x == 0){
-                    Rx = Math.abs(picture.get(1,y).getRed() - picture.get(width() - 1, y).getRed());
-                    Gx = Math.abs(picture.get(1,y).getGreen() - picture.get(width() - 1, y).getGreen());
-                    Bx = Math.abs(picture.get(1,y).getBlue() - picture.get(width() - 1, y).getBlue());
+                    Rx = abs(picture.get(1,y).getRed() - picture.get(width() - 1, y).getRed());
+                    Gx = abs(picture.get(1,y).getGreen() - picture.get(width() - 1, y).getGreen());
+                    Bx = abs(picture.get(1,y).getBlue() - picture.get(width() - 1, y).getBlue());
                 }
                 else if (x == width() - 1){
-                    Rx = Math.abs(picture.get(0,y).getRed() - picture.get(width() - 2, y).getRed());
-                    Gx = Math.abs(picture.get(0,y).getGreen() - picture.get(width() - 2, y).getGreen());
-                    Bx = Math.abs(picture.get(0,y).getBlue() - picture.get(width() - 2, y).getBlue());
+                    Rx = abs(picture.get(0,y).getRed() - picture.get(width() - 2, y).getRed());
+                    Gx = abs(picture.get(0,y).getGreen() - picture.get(width() - 2, y).getGreen());
+                    Bx = abs(picture.get(0,y).getBlue() - picture.get(width() - 2, y).getBlue());
                 }
                 else{
-                    Rx = Math.abs(picture.get(x - 1,y).getRed() - picture.get(x + 1, y).getRed());
-                    Gx = Math.abs(picture.get(x - 1,y).getGreen() - picture.get(x + 1, y).getGreen());
-                    Bx = Math.abs(picture.get(x - 1,y).getBlue() - picture.get(x + 1, y).getBlue());
+                    Rx = abs(picture.get(x - 1,y).getRed() - picture.get(x + 1, y).getRed());
+                    Gx = abs(picture.get(x - 1,y).getGreen() - picture.get(x + 1, y).getGreen());
+                    Bx = abs(picture.get(x - 1,y).getBlue() - picture.get(x + 1, y).getBlue());
                 }
 
 
                 if (y == 0){
-                    Ry = Math.abs(picture.get(x,1).getRed() - picture.get(x, height() - 1).getRed());
-                    Gy = Math.abs(picture.get(x,1).getGreen() - picture.get(x, height() - 1).getGreen());
-                    By = Math.abs(picture.get(x,1).getBlue() - picture.get(x, height() - 1).getBlue());
+                    Ry = abs(picture.get(x,1).getRed() - picture.get(x, height() - 1).getRed());
+                    Gy = abs(picture.get(x,1).getGreen() - picture.get(x, height() - 1).getGreen());
+                    By = abs(picture.get(x,1).getBlue() - picture.get(x, height() - 1).getBlue());
                 }
                 else if (y == height() - 1){
-                    Ry = Math.abs(picture.get(x,0).getRed() - picture.get(x, height() - 2).getRed());
-                    Gy = Math.abs(picture.get(x,0).getGreen() - picture.get(x, height() - 2).getGreen());
-                    By = Math.abs(picture.get(x,0).getBlue() - picture.get(x, height() - 2).getBlue());
+                    Ry = abs(picture.get(x,0).getRed() - picture.get(x, height() - 2).getRed());
+                    Gy = abs(picture.get(x,0).getGreen() - picture.get(x, height() - 2).getGreen());
+                    By = abs(picture.get(x,0).getBlue() - picture.get(x, height() - 2).getBlue());
                 }
                 else{
-                    Ry = Math.abs(picture.get(x, y - 1).getRed() - picture.get(x, y + 1).getRed());
-                    Gy = Math.abs(picture.get(x, y - 1).getGreen() - picture.get(x, y + 1).getGreen());
-                    By = Math.abs(picture.get(x, y - 1).getBlue() - picture.get(x, y + 1).getBlue());
+                    Ry = abs(picture.get(x, y - 1).getRed() - picture.get(x, y + 1).getRed());
+                    Gy = abs(picture.get(x, y - 1).getGreen() - picture.get(x, y + 1).getGreen());
+                    By = abs(picture.get(x, y - 1).getBlue() - picture.get(x, y + 1).getBlue());
                 }
                 energy[x][y] = Rx * Rx + Gx * Gx + Bx * Bx + Ry * Ry + Gy * Gy + By * By;
                 buffer[x][y] = energy[x][y];
@@ -51,7 +55,7 @@ public class SeamCarver {
         }
     }
     public Picture picture(){
-        return picture;
+        return new Picture(picture);
     }
     public int width(){
         return width;
