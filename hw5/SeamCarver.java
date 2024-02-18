@@ -17,7 +17,12 @@ public class SeamCarver {
         for (int x = 0; x < width; x++){
             for (int y = 0; y < height; y++){
                 double Rx, Gx, Bx, Ry, Gy, By;
-                if (x == 0){
+                if (x == 0 && x == width() - 1) {
+                    Rx = 0;
+                    Gx = 0;
+                    Bx = 0;
+                }
+                else if (x == 0){
                     Rx = abs(picture.get(1,y).getRed() - picture.get(width() - 1, y).getRed());
                     Gx = abs(picture.get(1,y).getGreen() - picture.get(width() - 1, y).getGreen());
                     Bx = abs(picture.get(1,y).getBlue() - picture.get(width() - 1, y).getBlue());
@@ -33,8 +38,12 @@ public class SeamCarver {
                     Bx = abs(picture.get(x - 1,y).getBlue() - picture.get(x + 1, y).getBlue());
                 }
 
-
-                if (y == 0){
+                if (y == 0 && y == height() - 1){
+                    Ry = 0;
+                    Gy = 0;
+                    By = 0;
+                }
+                else if (y == 0){
                     Ry = abs(picture.get(x,1).getRed() - picture.get(x, height() - 1).getRed());
                     Gy = abs(picture.get(x,1).getGreen() - picture.get(x, height() - 1).getGreen());
                     By = abs(picture.get(x,1).getBlue() - picture.get(x, height() - 1).getBlue());
@@ -88,39 +97,74 @@ public class SeamCarver {
     }
     public int[] findVerticalSeam(){
         int[] res = new int[height()];
-        int i = 0, j = 0, start = 0;
-        double min = Double.POSITIVE_INFINITY;
-        for (i = 0; i < width(); i++){
-            if (energy(i, j) < min){
-                start = i;
-                min = energy(i,j);
-            }
+        double[][] M = new double[width()][height()];
+        int[][] prev = new int[width()][height()];
+        for (int i = 0; i < width(); i++){
+            M[i][0] = energy(i, 0);
+            prev[i][0] = -1;
         }
-        res[0] = start;
-        for (j = 1; j <= height() - 1; j++){
-            int x1 = res[j - 1] - 1, x2 = res[j - 1], x3 = res[j - 1] + 1;
-            if (x1 < 0){
-                double e2 = energy(x2, j), e3 = energy(x3, j);
-                res[j] = (e2 <= e3) ? x2 : x3;
-            }
-            else if (x3 > width() - 1){
-                double e1 = energy(x1, j), e2 = energy(x2, j);
-                res[j] = (e1 <= e2) ? x1 : x2;
-            }
-            else {
-                double e1 = energy(x1, j), e2 = energy(x2, j), e3 = energy(x3, j);
-                if (e1 <= e2) {
-                    if (e1 <= e3)
-                        res[j] = x1;
-                    else
-                        res[j] = x3;
-                } else {
-                    if (e2 <= e3)
-                        res[j] = x2;
-                    else
-                        res[j] = x3;
+        for (int y = 1; y < height(); y++){
+            for (int x = 0; x < width(); x++){
+                if (x == 0 && x == width() - 1){
+                    M[x][y] = M[x][y - 1] + energy(x, y);
+                    prev[x][y] = x;
+                }
+                else if (x == 0){
+                    if (M[x][y - 1] <= M[x + 1][y - 1]){
+                        prev[x][y] = x;
+                        M[x][y] = M[x][y - 1] + energy(x, y);
+                    }
+                    else {
+                        prev[x][y] = x + 1;
+                        M[x][y] = M[x + 1][y - 1] + energy(x, y);
+                    }
+                }
+                else if (x == width() - 1){
+                    if (M[x][y - 1] <= M[x - 1][y - 1]){
+                        prev[x][y] = x;
+                        M[x][y] = M[x][y - 1] + energy(x, y);
+                    }
+                    else {
+                        prev[x][y] = x - 1;
+                        M[x][y] = M[x - 1][y - 1] + energy(x, y);
+                    }
+                }
+                else{
+                    if (M[x][y - 1] <= M[x - 1][y - 1]){
+                        if (M[x][y - 1] <= M[x + 1][y - 1]){
+                            prev[x][y] = x;
+                            M[x][y] = M[x][y - 1] + energy(x, y);
+                        }
+                        else{
+                            prev[x][y] = x + 1;
+                            M[x][y] = M[x + 1][y - 1] + energy(x, y);
+                        }
+                    }
+                    else {
+                        if (M[x - 1][y - 1] <= M[x + 1][y - 1]){
+                            prev[x][y] = x - 1;
+                            M[x][y] = M[x - 1][y - 1] + energy(x, y);
+                        }
+                        else{
+                            prev[x][y] = x + 1;
+                            M[x][y] = M[x + 1][y - 1] + energy(x, y);
+                        }
+                    }
                 }
             }
+        }
+        int last = 0;
+        double min = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < width(); i++){
+            if (M[i][height() - 1] < min){
+                min = M[i][height() - 1];
+                last = i;
+            }
+        }
+        res[height() - 1] = last;
+        for (int i = height() - 2; i >= 0; i--){
+            res[i] = prev[last][i + 1];
+            last = prev[last][i + 1];
         }
         return res;
     }
