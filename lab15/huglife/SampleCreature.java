@@ -90,9 +90,8 @@ public class SampleCreature extends Creature {
         List<Direction> empties = getNeighborsOfType(neighbors, "empty");
         if (empties.size() == 1) {
             Direction moveDir = empties.get(0);
-            return new Action(Action.ActionType.MOVE, moveDir);
+            return new Action(Action.ActionType.MOVE, Direction.BOTTOM);
         }
-
         if (empties.size() > 1) {
             if (HugLifeUtils.random() < moveProbability) {
                 Direction moveDir = HugLifeUtils.randomEntry(empties);
