@@ -1,7 +1,7 @@
 import edu.princeton.cs.algs4.Picture;
 
 public class SeamCarver {
-    private Picture picture;
+    private final Picture picture;
     private double[][] energy, buffer;
     private int width, height;
 
@@ -9,7 +9,7 @@ public class SeamCarver {
         return (d >= 0)? d : -d;
     }
     public SeamCarver(Picture picture){
-        this.picture = picture;
+        this.picture = new Picture(picture);
         this.width = picture.width();
         this.height = picture.height();
         this.energy = new double[width][height];
