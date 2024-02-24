@@ -1,2 +1,4 @@
 18spring
-project2 part2没有做
+剩余没有完成的部分：
+project2 partb
+makeup homework6
